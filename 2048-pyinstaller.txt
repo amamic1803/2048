@@ -1,2 +1,0 @@
-Generate executable:
-pyinstaller "Program-v5.py" --upx-dir "__upx_dir__" --noconsole --icon "2048-icon.ico" --onefile --add-data "2048-icon.ico;." --clean --key "_key_" --name "2048-v5"
