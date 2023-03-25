@@ -102,7 +102,7 @@ def main():
 	onefile = True
 	uac_admin = False
 	icon = "data\\2048-icon.ico"
-	upx = "data\\upx.exe"
+	upx = "data\\upx-win64\\upx.exe"
 	files = [icon]
 	folders = []
 
