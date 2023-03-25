@@ -24,10 +24,24 @@ fn make_best_move(board: [[u32; 4]; 4], depth: usize) -> ([[u32; 4]; 4], Vec<usi
     (game.board, game.moves, game.score, move_result)
 }
 
+#[pyfunction]
+fn is_game_won(board: [[u32; 4]; 4]) -> bool {
+    let game = Game2048::from_existing(board);
+    game.is_game_won()
+}
+
+#[pyfunction]
+fn is_game_over(board: [[u32; 4]; 4]) -> bool {
+    let game = Game2048::from_existing(board);
+    game.is_game_over()
+}
+
 #[pymodule]
 fn rust_2048(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(new_game, m)?)?;
     m.add_function(wrap_pyfunction!(make_move, m)?)?;
     m.add_function(wrap_pyfunction!(make_best_move, m)?)?;
+    m.add_function(wrap_pyfunction!(is_game_won, m)?)?;
+    m.add_function(wrap_pyfunction!(is_game_over, m)?)?;
     Ok(())
 }
