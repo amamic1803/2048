@@ -2,11 +2,38 @@ import datetime
 import os
 import random
 import shutil
+import subprocess
 
 import PyInstaller.__main__
 
 
-def build(name, console, onefile, uac_admin, key, icon, upx, files, folders):
+def build_rust():
+	if os.path.isfile(".\\lib\\rust_2048.pyd"):
+		os.remove(".\\lib\\rust_2048.pyd")
+
+	subprocess.run(["cargo", "clean"], cwd=".\\rust_2048", stdin=None, stdout=None, stderr=None, input=None, capture_output=False,
+	               timeout=None, check=True, shell=False, env=None, universal_newlines=False, errors=None,
+	               text=None)
+
+	subprocess.run(["cargo", "build", "--release"], cwd=".\\rust_2048", stdin=None, stdout=None, stderr=None, input=None, capture_output=False,
+	               timeout=None, check=True, shell=True, env=None, universal_newlines=False, errors=None,
+	               text=None)
+
+	# rename file
+	os.rename(".\\rust_2048\\target\\release\\rust_2048.dll", ".\\rust_2048\\target\\release\\rust_2048.pyd")
+
+	# copy file
+	shutil.copyfile(".\\rust_2048\\target\\release\\rust_2048.pyd", ".\\lib\\rust_2048.pyd")
+
+	subprocess.run(["cargo", "clean"], cwd=".\\rust_2048", stdin=None, stdout=None, stderr=None, input=None,
+	               capture_output=False,
+	               timeout=None, check=True, shell=False, env=None, universal_newlines=False, errors=None,
+	               text=None)
+
+def build(name, console, onefile, uac_admin, icon, upx, files, folders, compile_rust):
+	if compile_rust:
+		build_rust()
+
 	work_path = "build"
 	while os.path.isdir(work_path):
 		work_path = f"build_{random.randint(1, 1_000_000_000)}"
@@ -34,9 +61,6 @@ def build(name, console, onefile, uac_admin, key, icon, upx, files, folders):
 
 	if uac_admin:
 		run_list.append("--uac-admin")
-
-	if key != "":
-		run_list.extend(('--key', key))
 
 	if icon != "":
 		icon_path = os.path.join(os.path.abspath("."), icon)
@@ -73,17 +97,21 @@ def build(name, console, onefile, uac_admin, key, icon, upx, files, folders):
 	shutil.rmtree(path=work_path, ignore_errors=True)
 
 def main():
-	name = "2048-v6.0.0"
+	name = "2048-v7.0.0"
 	console = False
 	onefile = True
 	uac_admin = False
-	key = "DarkLord76865"
 	icon = "data\\2048-icon.ico"
 	upx = "data\\upx.exe"
 	files = [icon]
 	folders = []
 
-	build(name, console, onefile, uac_admin, key, icon, upx, files, folders)
+	# compile Rust code
+	# needs to be True for every platform except Windows x64 (as it is precompiled for it)
+	# Rust needs to be installed and added to PATH as well as cargo
+	compile_rust = True
+
+	build(name, console, onefile, uac_admin, icon, upx, files, folders, compile_rust)
 
 
 if __name__ == '__main__':
