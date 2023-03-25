@@ -2,26 +2,26 @@ use pyo3::prelude::*;
 use tools_2048::Game2048;
 
 #[pyfunction]
-fn new_game() -> ([[u32; 4]; 4], Vec<usize>) {
-    // (board, moves)
+fn new_game() -> ([[u32; 4]; 4], Vec<usize>, u32) {
+    // (board, moves, score)
     let game = Game2048::new();
-    (game.board, game.moves)
+    (game.board, game.moves, game.score)
 }
 
 #[pyfunction]
-fn make_move(board: [[u32; 4]; 4], move_type: usize) -> ([[u32; 4]; 4], Vec<usize>, usize) {
-    // (board, moves, move_result)
+fn make_move(board: [[u32; 4]; 4], move_type: usize) -> ([[u32; 4]; 4], Vec<usize>, u32, usize) {
+    // (board, moves, score, move_result)
     let mut game = Game2048::from_existing(board);
     let move_result = game.make_move(move_type);
-    (game.board, game.moves, move_result)
+    (game.board, game.moves, game.score, move_result)
 }
 
 #[pyfunction]
-fn make_best_move(board: [[u32; 4]; 4], depth: usize) -> ([[u32; 4]; 4], Vec<usize>, usize) {
-    // (board, moves, move_result)
+fn make_best_move(board: [[u32; 4]; 4], depth: usize) -> ([[u32; 4]; 4], Vec<usize>, u32, usize) {
+    // (board, moves, score, move_result)
     let mut game = Game2048::from_existing(board);
     let move_result = game.make_move(game.find_best_move(depth));
-    (game.board, game.moves, move_result)
+    (game.board, game.moves, game.score, move_result)
 }
 
 #[pymodule]
