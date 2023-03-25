@@ -1,7 +1,7 @@
 # 2048
 A recreation of 2048 game
 
-![screenshot](https://user-images.githubusercontent.com/40371578/178149954-de315e2d-623b-408b-a3cf-5404430d3235.png)
+![screenshot v7.0.0](https://user-images.githubusercontent.com/40371578/227711149-07d734d7-128b-45d7-b0b4-97bc175eca38.png)
 
 ## Downloading
 Prebuilt program is available under Releases
