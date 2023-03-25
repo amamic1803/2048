@@ -1,18 +1,9 @@
 import os
-import random
 import sys
 from tkinter import *
 
+import lib.rust_2048 as rust_2048
 
-def deep_copy(lista: list):
-	temp_list = []
-	for x in lista:
-		try:
-			len(x)
-			temp_list.append(deep_copy(x))
-		except TypeError:
-			temp_list.append(x)
-	return temp_list
 
 def resource_path(relative_path):
 	""" Get absolute path to resource, works for dev and for PyInstaller """
@@ -39,174 +30,61 @@ def round_rectangle(lokacija, x1, y1, x2, y2, radius, steps, **kwargs):
 
 	return lokacija.create_polygon(points, **kwargs, smooth=True, splinesteps=steps)
 
-def spawn_rnd(ploca):
-	spawn_places = []
-	for x in range(4):
-		for y in range(4):
-			if ploca[x][y] == 0:
-				spawn_places.append((x, y))
-	spawn_place = random.choice(spawn_places)
+def make_move(potez, ai=False):
+	global ploca
+	global bodovi
+	global won, lost
+	global potezi
 
-	ploca[spawn_place[0]][spawn_place[1]] = 2 if random.random() < 0.9 else 4
+	# 0: left, 1: right, 2: up, 3: down
 
-	return ploca
-
-def victory(ploca):
-	for i in ploca:
-		if 2048 in i:
-			pobjeda.place(x=120, y=120, width=200, height=50)
-			return True
-	return False
-
-def game_over(ploca, klik_up, klik_down, klik_left, klik_right):
-	global won
-	if ploca == klik_left == klik_right == klik_up == klik_down:
-		if not won:
-			poraz.place(x=95, y=120, width=260, height=50)
-		return True
+	if not ai:
+		rezultat = rust_2048.make_move(ploca, potez)
 	else:
-		return False
-
-def calc_moves(ploca):
-	# up
-	bodovi_up = 0
-	stupci = []
-	for i in range(4):
-		stupac = []
-		for j in range(4):
-			stupac.append(ploca[j][i])
-		stupci.append(stupac)
-	for stupac in stupci:
-		br_nula = stupac.count(0)
-		izbrisano = 0
-		for i in range(4):
-			if stupac[i - izbrisano] == 0:
-				stupac.pop(i - izbrisano)
-				izbrisano += 1
-		stupac.extend([0 for _ in range(br_nula)])
-		for i in range(3):
-			if stupac[i] != 0 and stupac[i] == stupac[i + 1]:
-				bodovi_up += stupac[i] * 2
-				stupac[i] *= 2
-				stupac.pop(i + 1)
-				stupac.append(0)
-	ploca_up = []
-	for i in range(4):
-		red = []
-		for j in range(4):
-			red.append(stupci[j][i])
-		ploca_up.append(red)
-	# up - end
-
-	# down
-	bodovi_down = 0
-	stupci = []
-	for i in range(4):
-		stupac = []
-		for j in range(4):
-			stupac.append(ploca[j][i])
-		stupci.append(stupac)
-	for stupac in stupci:
-		br_nula = stupac.count(0)
-		izbrisano = 0
-		for i in range(4):
-			if stupac[i - izbrisano] == 0:
-				stupac.pop(i - izbrisano)
-				izbrisano += 1
-		for _ in range(br_nula):
-			stupac.insert(0, 0)
-		for i in range(-1, -4, -1):
-			if stupac[i] != 0 and stupac[i] == stupac[i - 1]:
-				bodovi_down += stupac[i] * 2
-				stupac[i] *= 2
-				stupac.pop(i - 1)
-				stupac.insert(0, 0)
-	ploca_down = []
-	for i in range(4):
-		red = []
-		for j in range(4):
-			red.append(stupci[j][i])
-		ploca_down.append(red)
-	# down - end
-
-	# left
-	bodovi_left = 0
-	ploca_left = deep_copy(ploca)
-	for red in ploca_left:
-		br_nula = red.count(0)
-		izbrisano = 0
-		for i in range(4):
-			if red[i - izbrisano] == 0:
-				red.pop(i - izbrisano)
-				izbrisano += 1
-		red.extend([0 for _ in range(br_nula)])
-		for i in range(3):
-			if red[i] != 0 and red[i] == red[i + 1]:
-				bodovi_left += red[i] * 2
-				red[i] *= 2
-				red.pop(i + 1)
-				red.append(0)
-	# left - end
-
-	# right
-	bodovi_right = 0
-	ploca_right = deep_copy(ploca)
-	for red in ploca_right:
-		br_nula = red.count(0)
-		izbrisano = 0
-		for i in range(4):
-			if red[i - izbrisano] == 0:
-				red.pop(i - izbrisano)
-				izbrisano += 1
-		for _ in range(br_nula):
-			red.insert(0, 0)
-		for i in range(-1, -4, -1):
-			if red[i] != 0 and red[i] == red[i - 1]:
-				bodovi_right += red[i] * 2
-				red[i] *= 2
-				red.pop(i - 1)
-				red.insert(0, 0)
-	# right - end
-
-	return ploca_up, ploca_down, ploca_left, ploca_right, bodovi_up, bodovi_down, bodovi_left, bodovi_right
+		dubina = 10_000
+		rezultat = rust_2048.make_best_move(ploca, dubina)
+	ploca = rezultat[0]
+	potezi = rezultat[1]
+	bodovi += rezultat[2]
+	if rezultat[3] == 1:
+		lost = True
+	if not won:
+		won = rust_2048.is_game_won(ploca)
+	refresh_gui()
 
 def klik(key):
 	global ploca
 	global bodovi
 	global won, lost
-	global futures
+	global potezi
 	global key_state
 
+	# 0: left, 1: right, 2: up, 3: down
+
 	if not lost:
-		old_ploca = deep_copy(ploca)
 		match key.keysym:
 			case "Up":
 				if not key_state["Up"]:
-					ploca = futures[0]
-					bodovi += futures[4]
 					key_state["Up"] = True
+					if 2 in potezi:
+						make_move(2)
 			case "Down":
 				if not key_state["Down"]:
-					ploca = futures[1]
-					bodovi += futures[5]
 					key_state["Down"] = True
+					if 3 in potezi:
+						make_move(3)
 			case "Left":
 				if not key_state["Left"]:
-					ploca = futures[2]
-					bodovi += futures[6]
 					key_state["Left"] = True
+					if 0 in potezi:
+						make_move(0)
 			case "Right":
 				if not key_state["Right"]:
-					ploca = futures[3]
-					bodovi += futures[7]
 					key_state["Right"] = True
-		if old_ploca != ploca:
-			spawn_rnd(ploca)
-		refresh_gui()
-		futures = calc_moves(ploca)
-		if not won:
-			won = victory(ploca)
-		lost = game_over(ploca, futures[0], futures[1], futures[2], futures[3])
+					if 1 in potezi:
+						make_move(1)
+			case "space":
+				make_move(0, True)
 
 def klik_release(key):
 	global key_state
@@ -229,6 +107,9 @@ def refresh_gui():
 	global field_color
 	global field_font_color
 	global crtanje_polja
+	global won, lost
+	global pobjeda, poraz
+	global root
 
 	for i in range(4):
 		for j in range(4):
@@ -251,20 +132,31 @@ def refresh_gui():
 				crtanje_polja.itemconfig(tekst_polja[i][j], text="")
 	score.itemconfig(bodovi_natpis, text=str(bodovi))
 
+	if lost and not poraz.winfo_ismapped():
+		if pobjeda.winfo_ismapped():
+			pobjeda.place_forget()
+		poraz.place(x=95, y=120, width=260, height=50)
+		return
+	if won and not lost and not pobjeda.winfo_ismapped():
+		pobjeda.place(x=120, y=120, width=200, height=50)
+
+	root.update_idletasks()
+
 def new(event=None):
 	global bodovi
 	global ploca
 	global won, lost
-	global futures
+	global potezi
 
 	bodovi = 0
+
 	won = False
 	lost = False
-	ploca = spawn_rnd(spawn_rnd([[0 for _ in range(4)] for _ in range(4)]))
-
-	futures = calc_moves(ploca)
 	pobjeda.place_forget()
 	poraz.place_forget()
+
+	ploca, potezi = rust_2048.new_game()
+
 	refresh_gui()
 
 def main():
@@ -272,8 +164,8 @@ def main():
 	global poraz
 	global ploca
 	global bodovi
+	global potezi
 	global won, lost
-	global futures
 	global key_state
 	global kocke_polja
 	global tekst_polja
@@ -282,6 +174,7 @@ def main():
 	global field_font_color
 	global crtanje_polja
 	global score, bodovi_natpis
+	global root
 
 	field_color = {0: "#CDC1B4",
 	               2: "#EEE4DA",
@@ -395,6 +288,9 @@ def main():
 
 	naslov = Label(root, anchor="center", text="2048", font="Helvetica 70 bold", background="#FAF8EF", foreground="#776E65", highlightthickness=0)
 	naslov.place(x=25, y=35, width=220, height=80)
+
+	ai_desc = Label(root, anchor="center", text="Press Space for AI", font="Helvetica 10 bold", background="#FAF8EF", foreground="#776E65", highlightthickness=0)
+	ai_desc.place(x=0, y=height-25, width=width, height=25)
 
 	round_rectangle(crtanje_polja, 25, 25, 525, 525, radius=15, steps=100, fill="#BBADA0")
 
