@@ -2,10 +2,10 @@ use pyo3::prelude::*;
 use tools_2048::Game2048;
 
 #[pyfunction]
-fn new_game() -> ([[u32; 4]; 4], Vec<usize>, u32) {
-    // (board, moves, score)
+fn new_game() -> ([[u32; 4]; 4], Vec<usize>) {
+    // (board, moves)
     let game = Game2048::new();
-    (game.board, game.moves, game.score)
+    (game.board, game.moves)
 }
 
 #[pyfunction]
