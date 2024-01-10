@@ -1,0 +1,12 @@
+[package]
+name = "tools_2048"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "tools_2048"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = "0.18.1"
+tools-2048 = "0.3.2"

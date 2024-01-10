@@ -1,8 +1,8 @@
-import datetime
 import os
 import random
 import shutil
 import subprocess
+import sys
 
 import PyInstaller.__main__
 
@@ -20,20 +20,19 @@ def build_rust():
 	               text=None)
 
 	# rename file
-	os.rename(".\\rust_2048\\target\\release\\rust_2048.dll", ".\\rust_2048\\target\\release\\rust_2048.pyd")
+	os.rename("lib/tools_2048/rust_2048\\target\\release\\rust_2048.dll",
+	          "lib/tools_2048/rust_2048\\target\\release\\rust_2048.pyd")
 
 	# copy file
-	shutil.copyfile(".\\rust_2048\\target\\release\\rust_2048.pyd", ".\\lib\\rust_2048.pyd")
+	shutil.copyfile("lib/tools_2048/rust_2048\\target\\release\\rust_2048.pyd", ".\\lib\\rust_2048.pyd")
 
 	subprocess.run(["cargo", "clean"], cwd=".\\rust_2048", stdin=None, stdout=None, stderr=None, input=None,
 	               capture_output=False,
 	               timeout=None, check=True, shell=False, env=None, universal_newlines=False, errors=None,
 	               text=None)
 
-def build(name, console, onefile, uac_admin, icon, upx, files, folders, compile_rust):
-	if compile_rust:
-		build_rust()
 
+def build(name, console, onefile, uac_admin, icon, files, folders):
 	work_path = "build"
 	while os.path.isdir(work_path):
 		work_path = f"build_{random.randint(1, 1_000_000_000)}"
@@ -41,10 +40,13 @@ def build(name, console, onefile, uac_admin, icon, upx, files, folders, compile_
 
 	result_path = os.path.abspath(".")
 
+	if os.path.isfile(os.path.join(result_path, f"{name}.exe")):
+		os.remove(os.path.join(result_path, f"{name}.exe"))
+
 	run_list = ['main.py',
 	            '--noconfirm',
 	            '--clean',
-	            '--name', f"{name}_{datetime.datetime.now().strftime('%Y-%m-%d_%H.%M.%S')}",
+	            '--name', name,
 	            '--workpath', work_path,
 	            '--specpath', work_path,
 	            '--distpath', result_path]
@@ -69,13 +71,6 @@ def build(name, console, onefile, uac_admin, icon, upx, files, folders, compile_
 		else:
 			run_list.extend(('--icon', icon_path))
 
-	if upx != "":
-		if not os.path.isfile(upx):
-			raise Exception("Invalid UPX!")
-		else:
-			upx_path = os.path.join(os.path.abspath("."), os.path.dirname(upx))
-			run_list.extend(('--upx-dir', upx_path))
-
 	for file in files:
 		if os.path.isfile(os.path.join(os.path.abspath("."), file)):
 			run_list.extend(('--add-data', f'{os.path.join(os.path.abspath("."), file)};{os.path.dirname(file)}'))
@@ -96,22 +91,26 @@ def build(name, console, onefile, uac_admin, icon, upx, files, folders, compile_
 	PyInstaller.__main__.run(run_list)
 	shutil.rmtree(path=work_path, ignore_errors=True)
 
+
 def main():
-	name = "2048-v7.0.0"
+	name = "2048"
+	version = "7.1.0"
+
 	console = False
 	onefile = True
 	uac_admin = False
-	icon = "data\\2048-icon.ico"
-	upx = "data\\upx-win64\\upx.exe"
-	files = [icon]
-	folders = []
+	icon = "resources\\2048-icon.ico"
 
-	# compile Rust code
-	# needs to be True for every platform except Windows x64 (as it is precompiled for it)
-	# Rust needs to be installed and added to PATH as well as cargo
-	compile_rust = True
+	files = []
+	folders = ["resources"]
 
-	build(name, console, onefile, uac_admin, icon, upx, files, folders, compile_rust)
+	if len(sys.argv) > 1 and sys.argv[1] == "--version":
+		print(version)
+	elif len(sys.argv) > 1 and sys.argv[1] == "--name":
+		print(name)
+	else:
+		name = f"{name}-v{version}"
+		build(name, console, onefile, uac_admin, icon, files, folders)
 
 
 if __name__ == '__main__':

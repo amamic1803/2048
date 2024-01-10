@@ -257,7 +257,7 @@ def main():
 	height = 700
 	root.geometry(f"{width}x{height}+{(root.winfo_screenwidth() // 2) - (width // 2)}+{(root.winfo_screenheight() // 2) - (height // 2)}")
 	root.resizable(False, False)
-	root.iconbitmap(resource_path("data/2048-icon.ico"))
+	root.iconbitmap(resource_path("resources/2048-icon.ico"))
 	root.title("2048")
 
 	crtanje_polja = Canvas(root, width=550, height=550, background="#FAF8EF", highlightthickness=0)
