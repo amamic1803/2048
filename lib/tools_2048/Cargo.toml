@@ -8,5 +8,5 @@ name = "tools_2048"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = "0.18.1"
-tools-2048 = "0.3.2"
+pyo3 = "0.20.2"
+tools-2048-cratesio = { version = "0.3.2", package = "tools-2048" }
