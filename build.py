@@ -7,31 +7,6 @@ import sys
 import PyInstaller.__main__
 
 
-def build_rust():
-	if os.path.isfile(".\\lib\\rust_2048.pyd"):
-		os.remove(".\\lib\\rust_2048.pyd")
-
-	subprocess.run(["cargo", "clean"], cwd=".\\rust_2048", stdin=None, stdout=None, stderr=None, input=None, capture_output=False,
-	               timeout=None, check=True, shell=False, env=None, universal_newlines=False, errors=None,
-	               text=None)
-
-	subprocess.run(["cargo", "build", "--release"], cwd=".\\rust_2048", stdin=None, stdout=None, stderr=None, input=None, capture_output=False,
-	               timeout=None, check=True, shell=True, env=None, universal_newlines=False, errors=None,
-	               text=None)
-
-	# rename file
-	os.rename("lib/tools_2048/rust_2048\\target\\release\\rust_2048.dll",
-	          "lib/tools_2048/rust_2048\\target\\release\\rust_2048.pyd")
-
-	# copy file
-	shutil.copyfile("lib/tools_2048/rust_2048\\target\\release\\rust_2048.pyd", ".\\lib\\rust_2048.pyd")
-
-	subprocess.run(["cargo", "clean"], cwd=".\\rust_2048", stdin=None, stdout=None, stderr=None, input=None,
-	               capture_output=False,
-	               timeout=None, check=True, shell=False, env=None, universal_newlines=False, errors=None,
-	               text=None)
-
-
 def build(name, console, onefile, uac_admin, icon, files, folders):
 	work_path = "build"
 	while os.path.isdir(work_path):
@@ -87,6 +62,12 @@ def build(name, console, onefile, uac_admin, icon, files, folders):
 						raise Exception("Invalid folder!")
 		else:
 			raise Exception("Invalid folder!")
+
+	# build rust code
+	subprocess.run(["maturin", "develop", "--release"], cwd=".\\lib\\tools_2048",
+	               stdin=None, stdout=None, stderr=None, input=None, capture_output=False,
+	               timeout=None, check=True, shell=False, env=None, universal_newlines=False,
+	               errors=None, text=None)
 
 	PyInstaller.__main__.run(run_list)
 	shutil.rmtree(path=work_path, ignore_errors=True)

@@ -1,9 +1,11 @@
 import os
 import sys
 from tkinter import *
+import tools_2048
 
-import lib.rust_2048 as rust_2048
-
+new_game = tools_2048.Game2048(4)
+new_game.make_move(0)
+print(new_game.board())
 
 def resource_path(relative_path):
 	""" Get absolute path to resource, works for dev and for PyInstaller """
