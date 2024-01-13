@@ -50,10 +50,15 @@ jobs:
         echo "NAME=${NAME}" >> $GITHUB_OUTPUT
         echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
 
+    - name: Compile Rust
+      run: |
+        source venv/Scripts/activate
+        cd lib/tools_2048
+        maturin develop --release
+
     - name: Package binary
       run: |
         source venv/Scripts/activate
-        maturin develop --release
         python build.py
 
     - name: Rename binary
