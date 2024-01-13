@@ -1,7 +1,7 @@
 # 2048
 A simple 2048 game written in Rust and Python
 
-![screenshot v7.0.0](https://user-images.githubusercontent.com/40371578/227711149-07d734d7-128b-45d7-b0b4-97bc175eca38.png)
+![screenshot_v7.1.0](https://github.com/amamic1803/2048/assets/40371578/05fe589d-6fbe-4fe0-8052-528f12f3ba00)
 
 ## Downloading
 Prebuilt program is available under Releases
