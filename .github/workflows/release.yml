@@ -28,17 +28,23 @@ jobs:
     - name: Install Rust
       run: rustup update
 
-    - name: Install requirements
-      run: pip install -r requirements.txt
-
     - name: Install UPX
       uses: crazy-max/ghaction-upx@v2
       with:
         install-only: true
 
+    - name: Create Python virtual environment
+      run: python -m venv venv
+
+    - name: Install requirements
+      run: |
+        source venv/Scripts/activate
+        pip install -r requirements.txt
+
     - name: Get name and version
       id: get_info
       run: |
+        source venv/Scripts/activate
         NAME=$(python build.py --name)
         VERSION=$(python build.py --version)
         echo "NAME=${NAME}" >> $GITHUB_OUTPUT
@@ -46,6 +52,7 @@ jobs:
 
     - name: Package binary
       run: |
+        source venv/Scripts/activate
         maturin develop --release
         python build.py
 
