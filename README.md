@@ -11,5 +11,6 @@ Prebuilt program is available under Releases
 2. Install Python
 3. Install Rust
 4. Install dependencies: `pip install -r requirements.txt`
-5. Run build.py
-6. Built `*.exe` will be placed in the same folder
+5. Install UPX (optional)
+6. Run build.py
+7. Built `*.exe` will be placed in the same folder
