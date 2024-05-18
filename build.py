@@ -69,13 +69,15 @@ def build(name, console, onefile, uac_admin, icon, files, folders):
 	               timeout=None, check=True, shell=False, env=None, universal_newlines=False,
 	               errors=None, text=None)
 
-	PyInstaller.__main__.run(run_list)
-	shutil.rmtree(path=work_path, ignore_errors=True)
+	try:
+		PyInstaller.__main__.run(run_list)
+	finally:
+		shutil.rmtree(path=work_path, ignore_errors=True)
 
 
 def main():
 	name = "2048"
-	version = "7.1.0"
+	version = "7.2.0"
 
 	console = False
 	onefile = True

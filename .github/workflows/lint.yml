@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         name: Checkout repository
 
       - uses: chartboost/ruff-action@v1
@@ -29,13 +29,19 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Update Rust
-        run: rustup update
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          components: clippy, rustfmt
 
       - name: Build
         run: cargo build
 
       - name: Clippy
         run: cargo clippy -- -D warnings
+
+      - name: Rustfmt
+        run: cargo fmt --all --check

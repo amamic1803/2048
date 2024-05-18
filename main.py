@@ -70,7 +70,7 @@ class App2048:
 		self.width = 550
 		self.height = 700
 
-		self.game = tools_2048.Game2048(4)
+		self.game = tools_2048.Game2048()
 
 		self.root = tk.Tk()
 		self.root.title("2048")
@@ -133,7 +133,7 @@ class App2048:
 		self.root.mainloop()
 
 	def new_game(self):
-		self.game = tools_2048.Game2048(4)
+		self.game = tools_2048.Game2048()
 		self.update_gui()
 
 	def update_gui(self):

@@ -2,8 +2,6 @@ use pyo3::exceptions::PyException;
 use pyo3::prelude::*;
 use tools_2048_cratesio::{Error, Game, GameMove, GameResult, GameState};
 
-
-
 // error wrapper
 struct ErrorWrapper(Error);
 impl From<Error> for ErrorWrapper {
@@ -17,23 +15,16 @@ impl From<ErrorWrapper> for PyErr {
     }
 }
 
-
-
 /// A class that represents the 2048 game.
 #[pyclass]
-struct Game2048(Game);
+struct Game2048(Game<4>);
 
 #[pymethods]
 impl Game2048 {
-
     /// Creates a new game of 2048.
-    /// # Arguments
-    /// * ```n```: The size of the board (```n```x```n```). Must be at least 4.
-    /// # Exceptions
-    /// * ```Exception```: If ```n``` is less than 4.
     #[new]
-    fn new(size: usize) -> Result<Self, ErrorWrapper> {
-        Ok(Self(Game::new(size)?))
+    fn new() -> Self {
+        Self(Game::<4>::new().unwrap())
     }
 
     /// Creates a game of 2048 from an existing board.
@@ -45,13 +36,13 @@ impl Game2048 {
     /// * ```Exception```: If the board is invalid. Must be quadratic.
     /// * ```Exception```: If the board contains invalid values. Must be 0 or powers of 2 (except 1).
     #[staticmethod]
-    fn from_existing(board: Vec<Vec<u64>>, score: u64) -> Result<Self, ErrorWrapper> {
+    fn from_existing(board: [[u64; 4]; 4], score: u64) -> Result<Self, ErrorWrapper> {
         Ok(Self(Game::from_existing(&board, score)?))
     }
 
     /// Returns the board of the game.
-    fn board(&self) -> Vec<Vec<u64>> {
-        self.0.board().to_owned()
+    fn board(&self) -> [[u64; 4]; 4] {
+        *self.0.board()
     }
 
     /// Returns the result of the game.
@@ -73,10 +64,8 @@ impl Game2048 {
     }
 
     /// Returns the size of the board.
-    /// # Returns
-    /// The size of the board (```n```x```n```).
     fn size(&self) -> usize {
-        self.0.size()
+        4
     }
 
     /// Returns the state of the game.
@@ -125,10 +114,8 @@ impl Game2048 {
     }
 }
 
-
-
 #[pymodule]
-fn tools_2048(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+fn tools_2048(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Game2048>()?;
     Ok(())
 }
